@@ -34,6 +34,7 @@ export const TASK_FORMATS = {
 export type TASK_FORMATS = typeof TASK_FORMATS; // For convenience to make some typing easier
 
 export interface Settings {
+    headerFilter: string;
     globalFilter: string;
     removeGlobalFilter: boolean;
     setCreatedDate: boolean;
@@ -62,6 +63,7 @@ export interface Settings {
 }
 
 const defaultSettings: Settings = {
+    headerFilter: '',
     globalFilter: '',
     removeGlobalFilter: false,
     setCreatedDate: false,
