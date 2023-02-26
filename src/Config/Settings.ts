@@ -1,5 +1,5 @@
 import { defaultSuggestionBuilderFactory } from '../Suggestor/Suggestor';
-import { DEFAULT_SYMBOLS } from '../TaskSerializer/default';
+import { DEFAULT_SYMBOLS, PLAINTEXT_SYMBOLS } from '../TaskSerializer/default';
 import { StatusConfiguration } from '../StatusConfiguration';
 import { Status } from '../Status';
 import { DefaultTaskSerializer, type TaskSerializer } from '../TaskSerializer';
@@ -26,6 +26,10 @@ const TaskFormatMap = {
     Default: {
         taskSerializer: new DefaultTaskSerializer(DEFAULT_SYMBOLS),
         buildSuggestions: defaultSuggestionBuilderFactory(DEFAULT_SYMBOLS),
+    },
+    'Default (Plaintext)': {
+        taskSerializer: new DefaultTaskSerializer(PLAINTEXT_SYMBOLS),
+        buildSuggestions: defaultSuggestionBuilderFactory(PLAINTEXT_SYMBOLS),
     },
 } as const;
 
