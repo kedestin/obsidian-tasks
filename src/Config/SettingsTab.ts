@@ -5,7 +5,7 @@ import { StatusRegistry } from '../StatusRegistry';
 import { Status } from '../Status';
 import type { StatusCollection } from '../StatusCollection';
 import * as Themes from './Themes';
-import type { HeadingState } from './Settings';
+import { type HeadingState, taskFormatKeys } from './Settings';
 import { getSettings, isFeatureEnabled, updateGeneralSetting, updateSettings } from './Settings';
 import { StatusSettings } from './StatusSettings';
 import settingsJson from './settingsConfiguration.json';
@@ -53,6 +53,23 @@ export class SettingsTab extends PluginSettingTab {
             cls: 'tasks-setting-important',
             text: 'Changing any settings requires a restart of obsidian.',
         });
+
+        // ---------------------------------------------------------------------------
+        containerEl.createEl('h4', { text: 'Task Format Settings' });
+        // ---------------------------------------------------------------------------
+
+        new Setting(containerEl)
+            .setName('Task Format')
+            .setDesc('Format used to write tasks.')
+            .addDropdown((dropdown) => {
+                for (const name of taskFormatKeys) {
+                    dropdown.addOption(name, name);
+                }
+
+                dropdown.setValue(getSettings().taskFormat).onChange(async (value) => {
+                    updateSettings({ taskFormat: value as (typeof taskFormatKeys)[number] });
+                });
+            });
 
         // ---------------------------------------------------------------------------
         containerEl.createEl('h4', { text: 'Global filter Settings' });
