@@ -9,6 +9,7 @@ import { resetSettings, updateSettings } from '../../src/Config/Settings';
 import { StatusRegistry } from '../../src/StatusRegistry';
 import { Status } from '../../src/Status';
 import { StatusConfiguration } from '../../src/StatusConfiguration';
+import { TaskLocation } from '../../src/TaskLocation';
 
 window.moment = moment;
 
@@ -70,7 +71,7 @@ function testToggleLineForOutOfRangeCursorPositions(
     expected: string,
     expectedCursorOffset: EditorPosition,
 ) {
-    const result = toggleLine(input, 'x.md');
+    const result = toggleLine(input, TaskLocation.fromUnknownPosition('x.md'));
     expect(result.text).toStrictEqual(expected);
     const actualCursorOffset = getNewCursorPosition(initialCursorOffset, result);
     expect(actualCursorOffset).toEqual(expectedCursorOffset);
@@ -193,10 +194,10 @@ describe('ToggleDone', () => {
             const line1 = '- [P] this is a task starting at Pro';
 
             // Assert
-            const line2 = toggleLine(line1, 'x.md').text;
+            const line2 = toggleLine(line1, TaskLocation.fromUnknownPosition('x.md')).text;
             expect(line2).toStrictEqual('- [C] this is a task starting at Pro');
 
-            const line3 = toggleLine(line2, 'x.md').text;
+            const line3 = toggleLine(line2, TaskLocation.fromUnknownPosition('x.md')).text;
             expect(line3).toStrictEqual('- [P] this is a task starting at Pro');
         });
 
@@ -206,10 +207,10 @@ describe('ToggleDone', () => {
             const line1 = '- [C] #task this is a task starting at Con';
 
             // Assert
-            const line2 = toggleLine(line1, 'x.md').text;
+            const line2 = toggleLine(line1, TaskLocation.fromUnknownPosition('x.md')).text;
             expect(line2).toStrictEqual('- [P] #task this is a task starting at Con');
 
-            const line3 = toggleLine(line2, 'x.md').text;
+            const line3 = toggleLine(line2, TaskLocation.fromUnknownPosition('x.md')).text;
             expect(line3).toStrictEqual('- [C] #task this is a task starting at Con');
         });
 
@@ -219,10 +220,10 @@ describe('ToggleDone', () => {
             const line1 = '- [P] this is a task starting at Pro, not matching the global filter';
 
             // Assert
-            const line2 = toggleLine(line1, 'x.md').text;
+            const line2 = toggleLine(line1, TaskLocation.fromUnknownPosition('x.md')).text;
             expect(line2).toStrictEqual('- [C] this is a task starting at Pro, not matching the global filter');
 
-            const line3 = toggleLine(line2, 'x.md').text;
+            const line3 = toggleLine(line2, TaskLocation.fromUnknownPosition('x.md')).text;
             expect(line3).toStrictEqual('- [P] this is a task starting at Pro, not matching the global filter');
         });
     });

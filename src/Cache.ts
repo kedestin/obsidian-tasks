@@ -365,7 +365,7 @@ session.
         return null;
     }
 
-    private static getPrecedingHeader(lineNumberTask: number, headings: HeadingCache[] | undefined): string | null {
+    public static getPrecedingHeader(lineNumberTask: number, headings: HeadingCache[] | undefined): string | null {
         if (headings === undefined) {
             return null;
         }

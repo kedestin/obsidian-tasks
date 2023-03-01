@@ -1,10 +1,10 @@
-import { Editor, type EditorPosition, MarkdownView, View } from 'obsidian';
+import { App, Editor, type EditorPosition, MarkdownView, View } from 'obsidian';
 import { StatusRegistry } from '../StatusRegistry';
-
+import { Cache } from '../Cache';
 import { Task, TaskRegularExpressions } from '../Task';
 import { TaskLocation } from '../TaskLocation';
 
-export const toggleDone = (checking: boolean, editor: Editor, view: View) => {
+export const toggleDone = (checking: boolean, editor: Editor, view: View, app: App) => {
     if (checking) {
         if (!(view instanceof MarkdownView)) {
             // If we are not in a markdown view, the command shouldn't be shown.
@@ -32,8 +32,9 @@ export const toggleDone = (checking: boolean, editor: Editor, view: View) => {
     const origCursorPos = editor.getCursor();
     const lineNumber = origCursorPos.line;
     const line = editor.getLine(lineNumber);
+    const precedingHeader = Cache.getPrecedingHeader(lineNumber, app.metadataCache.getCache(path)?.headings);
 
-    const insertion = toggleLine(line, path);
+    const insertion = toggleLine(line, new TaskLocation(path, lineNumber, 0, 0, precedingHeader));
     editor.setLine(lineNumber, insertion.text);
 
     /* Cursor positions are 0-based for both "line" and "ch" offsets.
@@ -64,11 +65,11 @@ interface EditorInsertion {
     moveTo?: Partial<EditorPosition>;
 }
 
-export const toggleLine = (line: string, path: string): EditorInsertion => {
+export const toggleLine = (line: string, taskLocation: TaskLocation): EditorInsertion => {
     const task = Task.fromLine({
         // Why are we using Task.fromLine instead of the Cache here?
         line,
-        taskLocation: TaskLocation.fromUnknownPosition(path), // We don't need precise location to toggle it here in the editor.
+        taskLocation,
         fallbackDate: null, // We don't need this to toggle it here in the editor.
     });
     if (task !== null) {

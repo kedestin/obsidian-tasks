@@ -26,7 +26,8 @@ export class Commands {
             id: 'toggle-done',
             name: 'Toggle task done',
             icon: 'check-in-circle',
-            editorCheckCallback: toggleDone,
+            editorCheckCallback: (checking: boolean, editor: Editor, view: View) =>
+                toggleDone(checking, editor, view, this.app),
         });
     }
 }
