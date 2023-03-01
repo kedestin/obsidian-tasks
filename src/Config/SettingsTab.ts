@@ -55,18 +55,25 @@ export class SettingsTab extends PluginSettingTab {
         });
 
         // ---------------------------------------------------------------------------
-        containerEl.createEl('h4', { text: 'Global filter Settings' });
+        containerEl.createEl('h4', { text: 'Filters' });
         // ---------------------------------------------------------------------------
 
+        // A fake section to add a description under 'Filters'
+        new Setting(containerEl).setDesc(
+            SettingsTab.createFragmentWithHTML(
+                '<p><b>Recommended: Leave this section empty if you want all checklist items in your vault to be tasks managed by this plugin.</b></p>' +
+                    '<p>Use the filters if you want Tasks to only act on a subset of your "<code>- [ ]</code>" checklist items, so that ' +
+                    'a checklist item must match all filters to be considered a task.<p>',
+            ),
+        );
+
         new Setting(containerEl)
-            .setName('Global task filter')
+            .setHeading()
+            .setName('Global Task Filter')
             .setDesc(
                 SettingsTab.createFragmentWithHTML(
-                    '<p><b>Recommended: Leave empty if you want all checklist items in your vault to be tasks managed by this plugin.</b></p>' +
-                        '<p>Use a global filter if you want Tasks to only act on a subset of your "<code>- [ ]</code>" checklist items, so that ' +
-                        'a checklist item must include the specified string in its description in order to be considered a task.<p>' +
-                        '<p>For example, if you set the global filter to <code>#task</code>, the Tasks plugin will only handle checklist items tagged with <code>#task</code>.</br>' +
-                        'Other checklist items will remain normal checklist items and not appear in queries or get a done date set.</p>' +
+                    '<p>If you set the global filter, the Tasks plugin will only handle checklist items that contain that phrase.' +
+                        ' Other checklist items will remain normal checklist items and not appear in queries or get a done date set.</p>' +
                         '<p>See the <a href="https://obsidian-tasks-group.github.io/obsidian-tasks/getting-started/global-filter/">documentation</a>.</p>',
                 ),
             )
@@ -98,6 +105,31 @@ export class SettingsTab extends PluginSettingTab {
 
                     await this.plugin.saveSettings();
                 });
+            });
+
+        new Setting(containerEl)
+            .setHeading()
+            .setName('Header Task Filter')
+            .setDesc(
+                SettingsTab.createFragmentWithHTML(
+                    '<p>If you set the header filter, the Tasks plugin will only handle checklist items under a header that contains that phrase.' +
+                        ' Other checklist items will remain normal checklist items and not appear in queries or get a done date set.</p>' +
+                        '<p>See the <a href="https://obsidian-tasks-group.github.io/obsidian-tasks/getting-started/header-filter/">documentation</a>.</p>',
+                ),
+            )
+            .addText((text) => {
+                const settings = getSettings();
+
+                // I wanted to make this say 'for example, #task or TODO'
+                // but wasn't able to figure out how to make the text box
+                // wide enough for the whole string to be visible.
+                text.setPlaceholder('e.g. #task or TODO')
+                    .setValue(settings.headerFilter)
+                    .onChange(async (value) => {
+                        updateSettings({ headerFilter: value });
+
+                        await this.plugin.saveSettings();
+                    });
             });
 
         // ---------------------------------------------------------------------------
