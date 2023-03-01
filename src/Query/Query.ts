@@ -79,9 +79,27 @@ export class Query implements IQuery {
     public explainQueryWithoutIntroduction(): string {
         let result = '';
 
-        const { globalFilter } = getSettings();
-        if (globalFilter.length !== 0) {
-            result += `Only tasks containing the global filter '${globalFilter}'.\n\n`;
+        const { globalFilter, headerFilter } = getSettings();
+        const describeFilter = ([what, val]: readonly [string, string]) => `the ${what} filter '${val}'`;
+        const parseFilters = (<const>[
+            ['global', globalFilter],
+            ['header', headerFilter],
+        ])
+            .filter(([, filter]) => filter.length !== 0)
+            .map(describeFilter);
+
+        if (parseFilters.length !== 0) {
+            result += 'Only tasks containing ';
+            // Make a comma seperated list, ending with a final 'and': "1, 2, and 3"
+            result += [
+                // Join everything except that last filter into a comma seperated list
+                parseFilters.slice(0, parseFilters.length - 1).join(', '),
+                parseFilters[parseFilters.length - 1],
+            ]
+                .filter((item) => item)
+                .join(', and ');
+
+            result += '.\n\n';
         }
 
         const numberOfFilters = this.filters.length;
