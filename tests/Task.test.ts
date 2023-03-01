@@ -107,6 +107,58 @@ describe('parsing', () => {
         resetSettings();
     });
 
+    it("returns null when task doesn't match header filter", () => {
+        // Arrange
+        updateSettings({ headerFilter: '#task' });
+        const line = '- [x] this is a done task 🗓 2021-09-12 ✅ 2021-06-20';
+
+        for (const precedingHeader of ["doesn't match", null]) {
+            // Act
+            const task = fromLine({ line, precedingHeader });
+            // Assert
+            expect(task).toBeNull();
+        }
+
+        // Cleanup
+        resetSettings();
+    });
+
+    it('returns task when header filter is a substring of header', () => {
+        // Arrange
+        const headerFilter = '#task';
+        updateSettings({ headerFilter });
+        const parseTaskWithPrecedingHeader = (precedingHeader: string) => {
+            const line = '- [x] this is a task';
+            // Act
+            const task = fromLine({ line, precedingHeader });
+
+            // Assert
+            expect(task).not.toBeNull();
+            expect(task.description).toEqual('this is a task');
+        };
+
+        parseTaskWithPrecedingHeader(headerFilter);
+        parseTaskWithPrecedingHeader(`This is a ${headerFilter}header`);
+        parseTaskWithPrecedingHeader(`${headerFilter} This is a header`);
+        parseTaskWithPrecedingHeader(`This is a ${headerFilter} header`);
+        // Cleanup
+        resetSettings();
+    });
+
+    it('returns task when header filter is unset', () => {
+        updateSettings({ headerFilter: '' });
+
+        for (const precedingHeader of ['this is a header', null]) {
+            // Act
+            const task = fromLine({ line: '- [x] this is a task', precedingHeader });
+
+            // Assert
+            expect(task).not.toBeNull();
+            expect(task.description).toEqual('this is a task');
+        }
+        resetSettings();
+    });
+
     it('supports capitalised status characters', () => {
         // See https://github.com/obsidian-tasks-group/obsidian-tasks/issues/520
         // "In combination with SlrVb's S-Checkbox CSS, Task Plugin breaks that style"
