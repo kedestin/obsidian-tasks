@@ -87,8 +87,8 @@ describe('ToggleDone', () => {
     // The | (pipe) indicates the calculated position where the cursor should be displayed.
     // Note that prior to the #1103 fix, this position was sometimes ignored.
 
-    // Most of the tests are run twice. The second time, they are tested with tasks that
-    // do not match the global filter.
+    // Most of the tests are run three times. Once with no filters set, once with tasks that
+    // do not match the global filter, and once with tasks that don't match the header filter.
 
     describe('empty line', () => {
         it('should add hyphen and space', () => {
@@ -98,6 +98,13 @@ describe('ToggleDone', () => {
 
         it("should add hyphen and space when global filter doesn't match", () => {
             updateSettings({ globalFilter: '#task' });
+
+            testToggleLine('|', '- |');
+            testToggleLine('foo|bar', '- foobar|');
+        });
+
+        it("should add hyphen and space when header filter doesn't match", () => {
+            updateSettings({ headerFilter: '#task' });
 
             testToggleLine('|', '- |');
             testToggleLine('foo|bar', '- foobar|');
@@ -113,6 +120,14 @@ describe('ToggleDone', () => {
 
         it("should add checkbox when global filter doesn't match", () => {
             updateSettings({ globalFilter: '#task' });
+
+            testToggleLine('|- ', '- [ ] |');
+            testToggleLine('- |', '- [ ] |');
+            testToggleLine('- |foobar', '- [ ] foobar|');
+        });
+
+        it("should add checkbox when header filter doesn't match", () => {
+            updateSettings({ headerFilter: '#task' });
 
             testToggleLine('|- ', '- [ ] |');
             testToggleLine('- |', '- [ ] |');
@@ -138,6 +153,16 @@ describe('ToggleDone', () => {
             // Issue #449 - cursor jumped 13 characters to the right on completion
             testToggleLine('- [ ] I have a |proper description', '- [x] I have a |proper description');
         });
+
+        it("should toggle checkbox when header filter doesn't match", () => {
+            updateSettings({ headerFilter: '#task' });
+
+            testToggleLine('|- [ ] ', '|- [x] ');
+            testToggleLine('- [ ] |', '- [x] |');
+
+            // Issue #449 - cursor jumped 13 characters to the right on completion
+            testToggleLine('- [ ] I have a |proper description', '- [x] I have a |proper description');
+        });
     });
 
     describe('a completed task', () => {
@@ -153,6 +178,20 @@ describe('ToggleDone', () => {
             updateSettings({ globalFilter: '#task' });
 
             // Done date is not removed if task does not match global filter
+            testToggleLine('|- [x]  ✅ 2022-09-04', '|- [ ] ✅ 2022-09-04');
+            testToggleLine('- [x]  ✅ 2022-09-04|', '- [ ] ✅ 2022-09-04|');
+
+            // Issue #449 - cursor jumped 13 characters to the left on un-completion
+            testToggleLine(
+                '- [x] I have a proper description| ✅ 2022-09-04',
+                '- [ ] I have a proper description| ✅ 2022-09-04',
+            );
+        });
+
+        it("should un-toggle checkbox and keep completion date when header filter doesn't match", () => {
+            updateSettings({ headerFilter: '#task' });
+
+            // Done date is not removed if task does not match header filter
             testToggleLine('|- [x]  ✅ 2022-09-04', '|- [ ] ✅ 2022-09-04');
             testToggleLine('- [x]  ✅ 2022-09-04|', '- [ ] ✅ 2022-09-04|');
 
@@ -185,6 +224,23 @@ describe('ToggleDone', () => {
             updateSettings({ globalFilter: '#task' });
 
             // Tasks do not recur, and no done-date added, if not matching global filter
+            testToggleLine(
+                '- [ ] I am a recurring task| 🔁 every day 📅 2022-09-04',
+                '- [x] I am a recurring task| 🔁 every day 📅 2022-09-04',
+            );
+
+            // With a trailing space at the end of the initial line, which is deleted
+            // when the task lines are regenerated, the cursor moves one character to the left:
+            testToggleLine(
+                '- [ ] I am a recurring task| 🔁 every day 📅 2022-09-04 ',
+                '- [x] I am a recurring task| 🔁 every day 📅 2022-09-04 ',
+            );
+        });
+
+        it("should toggle checkbox, but not create a new task when header filter doesn't match", () => {
+            updateSettings({ headerFilter: '#task' });
+
+            // Tasks do not recur, and no done-date added, if not matching header filter
             testToggleLine(
                 '- [ ] I am a recurring task| 🔁 every day 📅 2022-09-04',
                 '- [x] I am a recurring task| 🔁 every day 📅 2022-09-04',
@@ -245,6 +301,32 @@ describe('ToggleDone', () => {
 
             const line3 = toggleLine(line2, TaskLocation.fromUnknownPosition('x.md')).text;
             expect(line3).toStrictEqual('- [P] this is a task starting at Pro, not matching the global filter');
+        });
+
+        it('when there is a header filter and task with header filter is toggled', () => {
+            updateSettings({ headerFilter: '#task' });
+            const location = new TaskLocation('x.md', 0, 0, 0, '#task');
+            const line1 = '- [C] this is a task starting at Con';
+
+            // Assert
+            const line2 = toggleLine(line1, location).text;
+            expect(line2).toStrictEqual('- [P] this is a task starting at Con');
+
+            const line3 = toggleLine(line2, location).text;
+            expect(line3).toStrictEqual('- [C] this is a task starting at Con');
+        });
+
+        it('when there is a header filter and task without header filter is toggled', () => {
+            updateSettings({ headerFilter: '#task' });
+
+            const line1 = '- [P] this is a task starting at Pro, not matching the header filter';
+
+            // Assert
+            const line2 = toggleLine(line1, TaskLocation.fromUnknownPosition('x.md')).text;
+            expect(line2).toStrictEqual('- [C] this is a task starting at Pro, not matching the header filter');
+
+            const line3 = toggleLine(line2, TaskLocation.fromUnknownPosition('x.md')).text;
+            expect(line3).toStrictEqual('- [P] this is a task starting at Pro, not matching the header filter');
         });
     });
 
