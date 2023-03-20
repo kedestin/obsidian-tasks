@@ -813,6 +813,30 @@ No filters supplied. All tasks will match the query.`;
             expect(query.explainQueryWithoutIntroduction()).toEqual(expectedDisplayText);
         });
 
+        it('should explain 0 filters with header filter', () => {
+            updateSettings({ headerFilter: '#task' });
+
+            const input = '';
+            const query = new Query({ source: input });
+
+            const expectedDisplayText = `Only tasks containing the header filter '#task'.
+
+No filters supplied. All tasks will match the query.`;
+            expect(query.explainQueryWithoutIntroduction()).toEqual(expectedDisplayText);
+        });
+
+        it('should explain 0 filters with header filter and global filter', () => {
+            updateSettings({ headerFilter: '#task2', globalFilter: '#task' });
+
+            const input = '';
+            const query = new Query({ source: input });
+
+            const expectedDisplayText = `Only tasks containing the global filter '#task', and the header filter '#task2'.
+
+No filters supplied. All tasks will match the query.`;
+            expect(query.explainQueryWithoutIntroduction()).toEqual(expectedDisplayText);
+        });
+
         it('should explain 1 filter', () => {
             const input = 'description includes hello';
             const query = new Query({ source: input });
@@ -829,6 +853,32 @@ No filters supplied. All tasks will match the query.`;
             const query = new Query({ source: input });
 
             const expectedDisplayText = `Only tasks containing the global filter '#task'.
+
+description includes hello
+`;
+            expect(query.explainQueryWithoutIntroduction()).toEqual(expectedDisplayText);
+        });
+
+        it('should explain 1 filter with header filter', () => {
+            updateSettings({ headerFilter: '#task' });
+
+            const input = 'description includes hello';
+            const query = new Query({ source: input });
+
+            const expectedDisplayText = `Only tasks containing the header filter '#task'.
+
+description includes hello
+`;
+            expect(query.explainQueryWithoutIntroduction()).toEqual(expectedDisplayText);
+        });
+
+        it('should explain 1 filter with global filter and header filter', () => {
+            updateSettings({ globalFilter: '#task', headerFilter: '#task2' });
+
+            const input = 'description includes hello';
+            const query = new Query({ source: input });
+
+            const expectedDisplayText = `Only tasks containing the global filter '#task', and the header filter '#task2'.
 
 description includes hello
 `;
