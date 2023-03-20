@@ -210,10 +210,14 @@ export class Task {
         // match[4] includes the whole body of the task after the brackets.
         const body = regexMatch[4].trim();
 
-        // return if task does not have the global filter. Do this before processing
-        // rest of match to improve performance.
-        const { globalFilter } = getSettings();
+        // return if task does not match global filter or header filter.
+        // Do this before processing rest of match to improve performance.
+        const { globalFilter, headerFilter } = getSettings();
         if (!body.includes(globalFilter)) {
+            return null;
+        }
+
+        if (headerFilter !== '' && !taskLocation.precedingHeader?.includes(headerFilter)) {
             return null;
         }
 
