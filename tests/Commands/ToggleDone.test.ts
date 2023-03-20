@@ -90,93 +90,113 @@ describe('ToggleDone', () => {
     // Most of the tests are run twice. The second time, they are tested with tasks that
     // do not match the global filter.
 
-    it('should add hyphen and space to empty line', () => {
-        testToggleLine('|', '- |');
-        testToggleLine('foo|bar', '- foobar|');
+    describe('empty line', () => {
+        it('should add hyphen and space', () => {
+            testToggleLine('|', '- |');
+            testToggleLine('foo|bar', '- foobar|');
+        });
 
-        updateSettings({ globalFilter: '#task' });
+        it("should add hyphen and space when global filter doesn't match", () => {
+            updateSettings({ globalFilter: '#task' });
 
-        testToggleLine('|', '- |');
-        testToggleLine('foo|bar', '- foobar|');
+            testToggleLine('|', '- |');
+            testToggleLine('foo|bar', '- foobar|');
+        });
     });
 
-    it('should add checkbox to hyphen and space', () => {
-        testToggleLine('|- ', '- [ ] |');
-        testToggleLine('- |', '- [ ] |');
-        testToggleLine('- |foobar', '- [ ] foobar|');
+    describe('line with just hyphen and space', () => {
+        it('should add checkbox', () => {
+            testToggleLine('|- ', '- [ ] |');
+            testToggleLine('- |', '- [ ] |');
+            testToggleLine('- |foobar', '- [ ] foobar|');
+        });
 
-        updateSettings({ globalFilter: '#task' });
+        it("should add checkbox when global filter doesn't match", () => {
+            updateSettings({ globalFilter: '#task' });
 
-        testToggleLine('|- ', '- [ ] |');
-        testToggleLine('- |', '- [ ] |');
-        testToggleLine('- |foobar', '- [ ] foobar|');
+            testToggleLine('|- ', '- [ ] |');
+            testToggleLine('- |', '- [ ] |');
+            testToggleLine('- |foobar', '- [ ] foobar|');
+        });
     });
 
-    it('should complete a task', () => {
-        testToggleLine('|- [ ] ', '|- [x]  ✅ 2022-09-04');
-        testToggleLine('- [ ] |', '- [x] | ✅ 2022-09-04');
+    describe('an uncompleted task', () => {
+        it('should complete a task', () => {
+            testToggleLine('|- [ ] ', '|- [x]  ✅ 2022-09-04');
+            testToggleLine('- [ ] |', '- [x] | ✅ 2022-09-04');
 
-        // Issue #449 - cursor jumped 13 characters to the right on completion
-        testToggleLine('- [ ] I have a |proper description', '- [x] I have a |proper description ✅ 2022-09-04');
+            // Issue #449 - cursor jumped 13 characters to the right on completion
+            testToggleLine('- [ ] I have a |proper description', '- [x] I have a |proper description ✅ 2022-09-04');
+        });
 
-        updateSettings({ globalFilter: '#task' });
+        it("should toggle checkbox when global filter doesn't match", () => {
+            updateSettings({ globalFilter: '#task' });
 
-        testToggleLine('|- [ ] ', '|- [x] ');
-        testToggleLine('- [ ] |', '- [x] |');
+            testToggleLine('|- [ ] ', '|- [x] ');
+            testToggleLine('- [ ] |', '- [x] |');
 
-        // Issue #449 - cursor jumped 13 characters to the right on completion
-        testToggleLine('- [ ] I have a |proper description', '- [x] I have a |proper description');
+            // Issue #449 - cursor jumped 13 characters to the right on completion
+            testToggleLine('- [ ] I have a |proper description', '- [x] I have a |proper description');
+        });
     });
 
-    it('should un-complete a completed task', () => {
-        testToggleLine('|- [x]  ✅ 2022-09-04', '|- [ ] ');
-        testToggleLine('- [x]  ✅ 2022-09-04|', '- [ ] |');
+    describe('a completed task', () => {
+        it('should un-complete a completed task', () => {
+            testToggleLine('|- [x]  ✅ 2022-09-04', '|- [ ] ');
+            testToggleLine('- [x]  ✅ 2022-09-04|', '- [ ] |');
 
-        // Issue #449 - cursor jumped 13 characters to the left on un-completion
-        testToggleLine('- [x] I have a proper description| ✅ 2022-09-04', '- [ ] I have a proper description|');
+            // Issue #449 - cursor jumped 13 characters to the left on un-completion
+            testToggleLine('- [x] I have a proper description| ✅ 2022-09-04', '- [ ] I have a proper description|');
+        });
 
-        updateSettings({ globalFilter: '#task' });
+        it("should un-toggle checkbox and keep completion date when global filter doesn't match", () => {
+            updateSettings({ globalFilter: '#task' });
 
-        // Done date is not removed if task does not match global filter
-        testToggleLine('|- [x]  ✅ 2022-09-04', '|- [ ] ✅ 2022-09-04');
-        testToggleLine('- [x]  ✅ 2022-09-04|', '- [ ] ✅ 2022-09-04|');
+            // Done date is not removed if task does not match global filter
+            testToggleLine('|- [x]  ✅ 2022-09-04', '|- [ ] ✅ 2022-09-04');
+            testToggleLine('- [x]  ✅ 2022-09-04|', '- [ ] ✅ 2022-09-04|');
 
-        // Issue #449 - cursor jumped 13 characters to the left on un-completion
-        testToggleLine(
-            '- [x] I have a proper description| ✅ 2022-09-04',
-            '- [ ] I have a proper description| ✅ 2022-09-04',
-        );
+            // Issue #449 - cursor jumped 13 characters to the left on un-completion
+            testToggleLine(
+                '- [x] I have a proper description| ✅ 2022-09-04',
+                '- [ ] I have a proper description| ✅ 2022-09-04',
+            );
+        });
     });
 
-    it('should complete a recurring task', () => {
-        testToggleLine(
-            '- [ ] I am a recurring task| 🔁 every day 📅 2022-09-04',
-            `- [ ] I am a recurring task 🔁 every day 📅 2022-09-05
+    describe('a recurring task', () => {
+        it('should complete a recurring task', () => {
+            testToggleLine(
+                '- [ ] I am a recurring task| 🔁 every day 📅 2022-09-04',
+                `- [ ] I am a recurring task 🔁 every day 📅 2022-09-05
 - [x] I am a recurring task| 🔁 every day 📅 2022-09-04 ✅ 2022-09-04`,
-        );
+            );
 
-        // With a trailing space at the end of the initial line, which is deleted
-        // when the task lines are regenerated, the cursor does not move one character to the left:
-        testToggleLine(
-            '- [ ] I am a recurring task| 🔁 every day 📅 2022-09-04 ',
-            `- [ ] I am a recurring task 🔁 every day 📅 2022-09-05
+            // With a trailing space at the end of the initial line, which is deleted
+            // when the task lines are regenerated, the cursor does not move one character to the left:
+            testToggleLine(
+                '- [ ] I am a recurring task| 🔁 every day 📅 2022-09-04 ',
+                `- [ ] I am a recurring task 🔁 every day 📅 2022-09-05
 - [x] I am a recurring task| 🔁 every day 📅 2022-09-04 ✅ 2022-09-04`,
-        );
+            );
+        });
 
-        updateSettings({ globalFilter: '#task' });
+        it("should toggle checkbox, but not create a new task when global filter doesn't match", () => {
+            updateSettings({ globalFilter: '#task' });
 
-        // Tasks do not recur, and no done-date added, if not matching global filter
-        testToggleLine(
-            '- [ ] I am a recurring task| 🔁 every day 📅 2022-09-04',
-            '- [x] I am a recurring task| 🔁 every day 📅 2022-09-04',
-        );
+            // Tasks do not recur, and no done-date added, if not matching global filter
+            testToggleLine(
+                '- [ ] I am a recurring task| 🔁 every day 📅 2022-09-04',
+                '- [x] I am a recurring task| 🔁 every day 📅 2022-09-04',
+            );
 
-        // With a trailing space at the end of the initial line, which is deleted
-        // when the task lines are regenerated, the cursor moves one character to the left:
-        testToggleLine(
-            '- [ ] I am a recurring task| 🔁 every day 📅 2022-09-04 ',
-            '- [x] I am a recurring task| 🔁 every day 📅 2022-09-04 ',
-        );
+            // With a trailing space at the end of the initial line, which is deleted
+            // when the task lines are regenerated, the cursor moves one character to the left:
+            testToggleLine(
+                '- [ ] I am a recurring task| 🔁 every day 📅 2022-09-04 ',
+                '- [x] I am a recurring task| 🔁 every day 📅 2022-09-04 ',
+            );
+        });
     });
 
     describe('should honour next status character', () => {
