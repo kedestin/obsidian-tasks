@@ -822,7 +822,7 @@ No filters supplied. All tasks will match the query.`;
             expect(query.explainQueryWithoutIntroduction()).toEqual(expectedDisplayText);
         });
 
-        it('should explain 1 filter', () => {
+        it('should explain 1 filter with global filter', () => {
             updateSettings({ globalFilter: '#task' });
 
             const input = 'description includes hello';
