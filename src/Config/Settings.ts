@@ -2,6 +2,7 @@ import { DEFAULT_SYMBOLS } from '../TaskSerializer/DefaultTaskSerializer';
 import { StatusConfiguration } from '../StatusConfiguration';
 import { Status } from '../Status';
 import { DefaultTaskSerializer, type TaskSerializer } from '../TaskSerializer';
+import { Query } from '../Query/Query';
 import { DebugSettings } from './DebugSettings';
 import { StatusSettings } from './StatusSettings';
 import { Feature } from './Feature';
@@ -34,6 +35,7 @@ export const TASK_FORMATS = {
 export type TASK_FORMATS = typeof TASK_FORMATS; // For convenience to make some typing easier
 
 export interface Settings {
+    globalQuery: string;
     globalFilter: string;
     removeGlobalFilter: boolean;
     taskFormat: keyof TASK_FORMATS;
@@ -62,6 +64,7 @@ export interface Settings {
 }
 
 const defaultSettings: Settings = {
+    globalQuery: '',
     globalFilter: '',
     removeGlobalFilter: false,
     taskFormat: 'tasksPluginEmoji',
@@ -181,4 +184,16 @@ export const toggleFeature = (internalName: string, enabled: boolean): FeatureFl
  */
 export function getUserSelectedTaskFormat(): TaskFormat {
     return TASK_FORMATS[getSettings().taskFormat];
+}
+
+/**
+ * Retries the global {@link Query}
+ *
+ * @exports
+ * @returns {Query}
+ */
+export function getGlobalQuery(): Query {
+    const { globalQuery } = getSettings();
+
+    return new Query({ source: globalQuery });
 }
