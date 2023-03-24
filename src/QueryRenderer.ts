@@ -11,6 +11,7 @@ import type { TasksEvents } from './TasksEvents';
 import type { Task } from './Task';
 import { DateFallback } from './DateFallback';
 import { explainResults } from './lib/QueryRenderer';
+import { getGlobalQuery } from './Config/Settings';
 
 export class QueryRenderer {
     private readonly app: App;
@@ -77,12 +78,12 @@ class QueryRenderChild extends MarkdownRenderChild {
         // added later.
         switch (this.containerEl.className) {
             case 'block-language-tasks':
-                this.query = new Query({ source });
+                this.query = QueryRenderChild.getQuery(this.source);
                 this.queryType = 'tasks';
                 break;
 
             default:
-                this.query = new Query({ source });
+                this.query = QueryRenderChild.getQuery(this.source);
                 this.queryType = 'tasks';
                 break;
         }
@@ -123,11 +124,23 @@ class QueryRenderChild extends MarkdownRenderChild {
         const millisecondsToMidnight = midnight.getTime() - now.getTime();
 
         this.queryReloadTimeout = setTimeout(() => {
-            this.query = new Query({ source: this.source });
+            this.query = QueryRenderChild.getQuery(this.source);
             // Process the current cache state:
             this.events.triggerRequestCacheUpdate(this.render.bind(this));
             this.reloadQueryAtMidnight();
         }, millisecondsToMidnight + 1000); // Add buffer to be sure to run after midnight.
+    }
+
+    /**
+     * Creates the actual query that {@link QueryRenderChild} will actually execute against the task list.
+     *
+     * This query is the result of joining the global query with the query in the task block
+     *
+     * @param {string} source The query source from the task block
+     * @returns {Query} The query to execute
+     */
+    private static getQuery(source: string): Query {
+        return getGlobalQuery().append(new Query({ source }));
     }
 
     private async render({ tasks, state }: { tasks: Task[]; state: State }) {
