@@ -73,16 +73,7 @@ export class Query implements IQuery {
     }
 
     public explainQuery(): string {
-        return 'Explanation of this Tasks code block query:\n\n' + this.explainQueryWithoutIntroduction();
-    }
-
-    public explainQueryWithoutIntroduction(): string {
         let result = '';
-
-        const { globalFilter } = getSettings();
-        if (globalFilter.length !== 0) {
-            result += `Only tasks containing the global filter '${globalFilter}'.\n\n`;
-        }
 
         const numberOfFilters = this.filters.length;
         if (numberOfFilters === 0) {

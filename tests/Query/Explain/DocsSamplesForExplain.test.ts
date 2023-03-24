@@ -5,7 +5,7 @@ import { verify } from 'approvals/lib/Providers/Jest/JestApprovals';
 import moment from 'moment';
 import { Options } from 'approvals/lib/Core/Options';
 import { Query } from '../../../src/Query/Query';
-
+import { explainResults } from '../../../src/lib/QueryRenderer';
 window.moment = moment;
 
 /**
@@ -30,7 +30,7 @@ function verifyQuery(instructions: string, options?: Options): void {
  */
 function verifyExplanation(instructions: string, options?: Options): void {
     const query = new Query({ source: instructions });
-    const explanation = query.explainQuery();
+    const explanation = explainResults(query);
 
     expect(query.error).toBeUndefined();
 
