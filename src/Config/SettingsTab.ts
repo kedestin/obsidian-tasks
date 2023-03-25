@@ -101,6 +101,28 @@ export class SettingsTab extends PluginSettingTab {
             });
 
         // ---------------------------------------------------------------------------
+        containerEl.createEl('h4', { text: 'Global Query' });
+        // ---------------------------------------------------------------------------
+
+        makeMultilineTextSetting(
+            new Setting(containerEl)
+                .setDesc(
+                    SettingsTab.createFragmentWithHTML(
+                        '<p>See the <a href="https://obsidian-tasks-group.github.io/obsidian-tasks/getting-started/queries/">documentation</a>.</p>',
+                    ),
+                )
+                .addTextArea((text) => {
+                    const settings = getSettings();
+
+                    text.setValue(settings.globalQuery).onChange(async (value) => {
+                        updateSettings({ globalQuery: value });
+
+                        await this.plugin.saveSettings();
+                    });
+                }),
+        );
+
+        // ---------------------------------------------------------------------------
         containerEl.createEl('h4', { text: 'Task Statuses' });
         // ---------------------------------------------------------------------------
 
@@ -583,4 +605,19 @@ async function updateAndSaveStatusSettings(statusTypes: StatusSettings, settings
     StatusSettings.applyToStatusRegistry(statusTypes, StatusRegistry.getInstance());
 
     await settings.saveSettings(true);
+}
+
+function makeMultilineTextSetting(setting: Setting) {
+    const { settingEl, infoEl, controlEl } = setting;
+    const textEl: HTMLElement | null = controlEl.querySelector('textarea');
+    console.log({ settingEl, infoEl, controlEl, textEl });
+
+    // Not a setting with a text field
+    if (textEl === null) {
+        return;
+    }
+
+    settingEl.style.display = 'block';
+    infoEl.style.marginRight = '0px';
+    textEl.style.minWidth = '-webkit-fill-available';
 }
